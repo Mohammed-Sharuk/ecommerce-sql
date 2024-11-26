@@ -1,0 +1,118 @@
+-- Create the database
+CREATE DATABASE ecommerce;
+
+-- Switch to the newly created database
+USE ecommerce;
+
+-- Create the `customers` table
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    address TEXT
+);
+
+-- Create the `orders` table
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date DATE NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+-- Create the `products` table
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT
+);
+
+-- Insert sample data into `customers`
+INSERT INTO customers (name, email, address)
+VALUES
+('John Doe', 'john.doe@example.com', '123 Main St'),
+('Jane Smith', 'jane.smith@example.com', '456 Oak Ave'),
+('Alice Johnson', 'alice.johnson@example.com', '789 Pine Rd');
+
+-- Insert sample data into `products`
+INSERT INTO products (name, price, description)
+VALUES
+('Product A', 30.00, 'Description for Product A'),
+('Product B', 20.00, 'Description for Product B'),
+('Product C', 40.00, 'Description for Product C');
+
+-- Insert sample data into `orders`
+INSERT INTO orders (customer_id, order_date, total_amount)
+VALUES
+(1, CURDATE(), 90.00),
+(2, CURDATE() - INTERVAL 15 DAY, 50.00),
+(1, CURDATE() - INTERVAL 35 DAY, 120.00);
+
+
+
+
+
+-- Find customers with orders placed in the last 30 days
+SELECT DISTINCT c.*
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+WHERE o.order_date >= CURDATE() - INTERVAL 30 DAY;
+
+-- Calculate the total amount of orders for each customer
+SELECT c.name, SUM(o.total_amount) AS total_spent
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+GROUP BY c.name;
+
+-- Update the price of Product C
+UPDATE products
+SET price = 45.00
+WHERE name = 'Product C';
+
+-- Add a discount column to the products table
+ALTER TABLE products
+ADD COLUMN discount DECIMAL(10, 2) DEFAULT 0.00;
+
+-- Get the top 3 most expensive products
+SELECT *
+FROM products
+ORDER BY price DESC
+LIMIT 3;
+
+-- Find customers who ordered Product A
+SELECT DISTINCT c.name
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+JOIN order_items oi ON o.id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+WHERE p.name = 'Product A';
+
+-- Join customers and orders to get customer names and order dates
+SELECT c.name AS customer_name, o.order_date
+FROM orders o
+JOIN customers c ON o.customer_id = c.id;
+
+-- Find orders with total amount greater than 150
+SELECT *
+FROM orders
+WHERE total_amount > 150.00;
+
+-- Create the `order_items` table
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+-- Remove redundant columns or adjust references in the `orders` table
+ALTER TABLE orders
+DROP COLUMN total_amount;
+
+-- Calculate the average total amount of orders
+SELECT AVG(o.total_amount) AS average_order_total
+FROM orders o;
