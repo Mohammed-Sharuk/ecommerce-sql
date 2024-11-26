@@ -96,13 +96,3 @@ This project implements a simple e-commerce database using MySQL. It includes ta
 - MySQL syntax is used for all operations.
 
 ---
-
-## Author
-
-Developed by [Your Name].
-
---- 
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
